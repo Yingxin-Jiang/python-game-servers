@@ -14,48 +14,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Google Cloud Game Servers sample for creating a game server deployment.
+"""Google Cloud Game Servers sample for deleting a game server config.
 
 Example usage:
-    python create_deployment.py --project-id <project-id> --deployment-id <deployment-id>
+    python delete_deployment.py --project-id <project-id> --deployment-id <deployment-id> --config-id <config-id>
 """
 
 import argparse
 
 from google.cloud import gaming
-from google.cloud.gaming_v1.types import game_server_deployments
+from google.cloud.gaming_v1.types import game_server_configs
 
 import wait_for_operation
 
 
-# [START cloud_game_servers_create_deployment]
-def create_deployment(project_id, deployment_id):
-    """Creates a game server deployment."""
+# [START cloud_game_servers_delete_config]
+def delete_config(project_id, deployment_id, config_id):
+    """Deletes a game server config."""
 
-    client = gaming.GameServerDeploymentsServiceClient()
+    client = gaming.GameServerConfigsServiceClient()
 
-    # Location is hard coded as global, as game server deployments can
+    # Location is hard coded as global, as game server configs can
     # only be created in global.  This is done for all operations on
-    # game server deployments, as well as for its child resource types.
-    request = game_server_deployments.CreateGameServerDeploymentRequest(
-        parent=f"projects/{project_id}/locations/global",
-        deployment_id=deployment_id,
-        game_server_deployment=game_server_deployments.GameServerDeployment(
-            description="My Game Server Deployment"
-        ),
+    # game server configs.
+    request = game_server_configs.DeleteGameServerConfigRequest(
+        name=f"projects/{project_id}/locations/global/gameServerDeployments/{deployment_id}/configs/{config_id}",
     )
 
-    response = client.create_game_server_deployment(request)
-    print(f"Create deployment operation: {response.operation.name}")
+    response = client.delete_game_server_config(request)
+    print(f"Delete config operation: {response.operation.name}")
     wait_for_operation.wait_for_operation(client._transport.operations_client, response.operation.name)
-# [END cloud_game_servers_create_deployment]
+# [END cloud_game_servers_delete_config]
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--project-id', help='Your cloud project ID.', required=True)
     parser.add_argument('--deployment-id', help='Your game server deployment ID.', required=True)
+    parser.add_argument('--config-id', help='Your game server config ID.', required=True)
 
     args = parser.parse_args()
 
-    create_deployment(args.project_id, args.deployment_id)
+    delete_config(args.project_id, args.deployment_id, args.config_id)
